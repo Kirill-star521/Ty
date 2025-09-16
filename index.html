@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина: Столицы мира | GitHub</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --accent: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), #8e44ad);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            color: var(--dark);
+            font-weight: bold;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: var(--dark);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            background: linear-gradient(to right, var(--primary), #9b59b6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .option.correct {
+            background: linear-gradient(to right, var(--secondary), #27ae60);
+        }
+        
+        .option.incorrect {
+            background: linear-gradient(to right, var(--accent), #c0392b);
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            background: var(--dark);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #1a252f;
+        }
+        
+        .result {
+            margin-top: 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .success {
+            color: var(--secondary);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .error {
+            color: var(--accent);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: var(--light);
+            display: none;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .github-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--light);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+            }
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Иконки */
+        .icon {
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container fade-in">
+        <div class="header">
+            <h1><span class="icon">🌍</span> Викторина: Столицы мира</h1>
+            <p class="description">Проверьте свои знания столиц разных стран мира. Выберите правильный ответ из четырех вариантов.</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="score-container">
+            <div class="score"><span class="icon">⭐</span> Очки: <span id="score">0</span></div>
+            <div class="question-count"><span class="icon">❓</span> Вопрос: <span id="question-counter">1</span>/10</div>
+        </div>
+        
+        <div class="question" id="question">Столица какой страны?</div>
+        
+        <div class="options">
+            <button class="option" id="option1"></button>
+            <button class="option" id="option2"></button>
+            <button class="option" id="option3"></button>
+            <button class="option" id="option4"></button>
+        </div>
+        
+        <div class="controls">
+            <button id="next-btn">Следующий вопрос <span class="icon">→</span></button>
+            <button id="restart-btn">Начать заново <span class="icon">🔄</span></button>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="message" id="message">
+            <p id="message-text"></p>
+        </div>
+        
+        <div class="footer">
+            <p>Разработано для демонстрации на GitHub Pages</p>
+            <a href="#" class="github-link" id="github-link">⭐ Поставить звезду на GitHub</a>
+        </div>
+    </div>
+
+    <script>
+        // Данные для викторины: страна и варианты столиц
+        const quizData = [
+            {
+                country: "Франция",
+                correct: "Париж",
+                options: ["Париж", "Лондон", "Берлин", "Мадрид"],
+                fact: "Париж известен как город света и славится своей Эйфелевой башней."
+            },
+            {
+                country: "Япония",
+                correct: "Токио",
+                options: ["Токио", "Пекин", "Сеул", "Бангкок"],
+                fact: "Токио - один из самых густонаселенных городов мира и технологический центр Азии."
+            },
+            {
+                country: "Бразилия",
+                correct: "Бразилиа",
+                options: ["Бразилиа", "Рио-де-Жанейро", "Буэнос-Айрес", "Лима"],
+                fact: "Бразилиа была специально построена как столица в 1960 году и является объектом Всемирного наследия ЮНЕСКО."
+            },
+            {
+                country: "Египет",
+                correct: "Каир",
+                options: ["Каир", "Тунис", "Рабат", "Амман"],
+                fact: "Каир - крупнейший город Ближнего Востока, расположенный рядом с пирамидами Гизы."
+            },
+            {
+                country: "Канада",
+                correct: "Оттава",
+                options: ["Оттава", "Торонто", "Монреаль", "Ванкувер"],
+                fact: "Оттава была выбрана столицей Канады королевой Викторией в 1857 году."
+            },
+            {
+                country: "Австралия",
+                correct: "Канберра",
+                options: ["Канберра", "Сидней", "Мельбурн", "Перт"],
+                fact: "Канберра была специально построена как столица для разрешения спора между Сиднеем и Мельбурном."
+            },
+            {
+                country: "Италия",
+                correct: "Рим",
+                options: ["Рим", "Милан", "Неаполь", "Флоренция"],
+                fact: "Рим, известный как Вечный город, имеет историю, насчитывающую более 2800 лет."
+            },
+            {
+                country: "Россия",
+                correct: "Москва",
+                options: ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург"],
+                fact: "Московский Кремль является одной из крупнейших крепостей в мире и резиденцией президента России."
+            },
+            {
+                country: "Германия",
+                correct: "Берлин",
+                options: ["Берлин", "Гамбург", "Мюнхен", "Кёльн"],
+                fact: "Берлинская стена разделяла город на восточную и западную части с 1961 по 1989 год."
+            },
+            {
+                country: "Турция",
+                correct: "Анкара",
+                options: ["Анкара", "Стамбул", "Измир", "Анталья"],
+                fact: "Анкара стала столицей Турции в 1923 году, сменив Стамбул (Константинополь)."
+            }
+        ];
+
+        // Элементы DOM
+        const questionEl = document.getElementById("question");
+        const option1El = document.getElementById("option1");
+        const option2El = document.getElementById("option2");
+        const option3El = document.getElementById("option3");
+        const option4El = document.getElementById("option4");
+        const scoreEl = document.getElementById("score");
+        const questionCounterEl = document.getElementById("question-counter");
+        const nextBtn = document.getElementById("next-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        const resultEl = document.getElementById("result");
+        const messageEl = document.getElementById("message");
+        const messageTextEl = document.getElementById("message-text");
+        const progressEl = document.getElementById("progress");
+        const githubLinkEl = document.getElementById("github-link");
+        
+        const options = document.querySelectorAll(".option");
+        
+        // Переменные игры
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        
+        // Инициализация игры
+        function init() {
+            // Назначение обработчиков событий
+            options.forEach(option => {
+                option.addEventListener("click", checkAnswer);
+            });
+            
+            nextBtn.addEventListener("click", nextQuestion);
+            restartBtn.addEventListener("click", restartGame);
+            githubLinkEl.addEventListener("click", function(e) {
+                e.preventDefault();
+                alert("Если вам понравилась эта игра, не забудьте поставить звезду на GitHub! Ссылка в описании репозитория.");
+            });
+            
+            // Начало игры
+            loadQuestion();
+        }
+        
+        // Загрузка вопроса
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            questionEl.textContent = `Столица ${question.country}?`;
+            
+            // Перемешиваем варианты ответов
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+            
+            option1El.textContent = shuffledOptions[0];
+            option2El.textContent = shuffledOptions[1];
+            option3El.textContent = shuffledOptions[2];
+            option4El.textContent = shuffledOptions[3];
+            
+            // Сброс стилей кнопок
+            options.forEach(option => {
+                option.classList.remove("correct", "incorrect");
+            });
+            
+            questionCounterEl.textContent = currentQuestion + 1;
+            resultEl.textContent = "";
+            resultEl.className = "result";
+            messageEl.style.display = "none";
+            answered = false;
+            nextBtn.disabled = true;
+            
+            // Обновление прогресс-бара
+            progressEl.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+        }
+        
+        // Проверка ответа
+        function checkAnswer(e) {
+            if (answered) return;
+            
+            const selectedOption = e.target;
+            const question = quizData[currentQuestion];
+            
+            answered = true;
+            nextBtn.disabled = false;
+            
+            // Проверяем правильность ответа
+            if (selectedOption.textContent === question.correct) {
+                selectedOption.classList.add("correct");
+                score += 10;
+                scoreEl.textContent = score;
+                resultEl.textContent = "Правильно! 🎉";
+                resultEl.className = "result success";
+            } else {
+                selectedOption.classList.add("incorrect");
+                resultEl.textContent = "Неправильно! 😢";
+                resultEl.className = "result error";
+                
+                // Показываем правильный ответ
+                options.forEach(option => {
+                    if (option.textContent === question.correct) {
+                        option.classList.add("correct");
+                    }
+                });
+            }
+            
+            // Показываем информацию о стране и столице
+            messageTextEl.textContent = `Столица ${question.country} - ${question.correct}. ${question.fact}`;
+            messageEl.style.display = "block";
+        }
+        
+        // Следующий вопрос
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                // Конец игры
+                endGame();
+            }
+        }
+        
+        // Завершение игры
+        function endGame() {
+            questionEl.textContent = "Викторина завершена!";
+            document.querySelector(".options").innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 20px;">
+                    <h2>Ваш результат: ${score} из ${quizData.length * 10}</h2>
+                    <p>${getResultMessage()}</p>
+                </div>
+            `;
+            
+            // Обновление прогресс-бара до 100%
+            progressEl.style.width = '100%';
+            
+            nextBtn.style.display = "none";
+            messageEl.style.display = "none";
+            resultEl.textContent = "";
+        }
+        
+        // Сообщение с результатом
+        function getResultMessage() {
+            if (score >= 90) return "Отлично! Вы настоящий эксперт в географии! 🏆";
+            if (score >= 70) return "Хороший результат! Вы хорошо знаете мировые столицы! 👍";
+            if (score >= 50) return "Неплохо! Но есть куда стремиться! 💪";
+            return "Попробуйте еще раз, чтобы улучшить свой результат! 🌍";
+        }
+        
+        // Перезапуск игры
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            scoreEl.textContent = score;
+            
+            // Восстанавливаем options
+            document.querySelector(".options").innerHTML = `
+                <button class="option" id="option1"></button>
+                <button class="option" id="option2"></button>
+                <button class="option" id="option3"></button>
+                <button class="option" id="option4"></button>
+            `;
+            
+            // Перепривязываем обработчики событий
+            document.getElementById("option1").addEventListener("click", checkAnswer);
+            document.getElementById("option2").addEventListener("click", checkAnswer);
+            document.getElementById("option3").addEventListener("click", checkAnswer);
+            document.getElementById("option4").addEventListener("click", checkAnswer);
+            
+            nextBtn.style.display = "inline-block";
+            nextBtn.disabled = true;
+            
+            loadQuestion();
+        }
+        
+        // Запуск игры при загрузке страницы
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
+<style>
+
+</style>
+<script>
+
+</script>
